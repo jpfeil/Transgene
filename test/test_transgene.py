@@ -62,8 +62,10 @@ class TransgeneTest(unittest.TestCase):
                 print('Testing with RNA')
             else:
                 print('Testing without RNA')
-            params.input_file = open(self._get_input_path('test_input/test.pc_translations.fa'))
+            params.peptide_file = open(self._get_input_path('test_input/test.pc_translations.fa'))
             params.snpeff_file = open(self._get_input_path('test_input/snpeff_test.vcf'))
+            params.transcript_file = open(self._get_input_path('test_input/test.pc_transcripts.fa'))
+            params.fusion_file = open(self._get_input_path('test_input/hook3_ret.results.tsv'))
             transgene.main(params)
             output = {'9mer': {'fasta': 'unit_test_tumor_9_mer_snpeffed.faa',
                                'map': 'unit_test_tumor_9_mer_snpeffed.faa.map'},
@@ -71,14 +73,14 @@ class TransgeneTest(unittest.TestCase):
                                 'map': 'unit_test_tumor_10_mer_snpeffed.faa.map'},
                       '15mer': {'fasta': 'unit_test_tumor_15_mer_snpeffed.faa',
                                 'map': 'unit_test_tumor_15_mer_snpeffed.faa.map'}}
-            for key,  data in output.iteritems():
+            for key, data in output.iteritems():
                 for feature, filename in data.iteritems():
                     assert os.path.exists(filename)
                     self.output_files.add(filename)
             self.pep_lens = output.keys()
             self.output = output
             self.check_output(params.rna_file is not None)
-            params.input_file.close()
+            params.peptide_file.close()
             params.snpeff_file.close()
 
     def check_output(self, test_with_rna_file):
@@ -92,15 +94,18 @@ class TransgeneTest(unittest.TestCase):
             '9mer': {'ELAGGGYVPSAPCPGET',  # ENST00000492084.1:L56P
                      'EFQNDFYRYCIRRSSPQ',  # ENST00000440843.2:S24Y
                      'PRLYKIYRGRDSERAPA',  # ENST00000395952.3:E19G
-                     'TAVTAPHSNSWDTYHQPRALEKH'},  # ENST00000395952.3:S42NXXXXXY48H
+                     'TAVTAPHSNSWDTYHQPRALEKH',  # ENST00000395952.3:S42NXXXXXY48H
+                     'QLETYKRQEDPKWEFP'},   # HOOK3-RET fusion
             '10mer': {'GELAGGGYVPSAPCPGETC',  # ENST00000492084.1:L56P
                       'LEFQNDFYRYCIRRSSPQP',  # ENST00000440843.2:S24Y
                       'GPRLYKIYRGRDSERAPAS',  # ENST00000395952.3:E19G
-                      'PTAVTAPHSNSWDTYHQPRALEKHA'},  # ENST00000395952.3:S42NXXXXXY48H
+                      'PTAVTAPHSNSWDTYHQPRALEKHA',  # ENST00000395952.3:S42NXXXXXY48H
+                      'SQLETYKRQEDPKWEFPR'},   # HOOK3-RET fusion
             '15mer': {'ESLYSGELAGGGYVPSAPCPGETC',  # ENST00000492084.1:L56P
                       'SLYPRLEFQNDFYRYCIRRSSPQPPPNLA',  # ENST00000440843.2:S24Y
                       'LSCVLGPRLYKIYRGRDSERAPASVPETP',  # ENST00000395952.3:E19G
-                      'SVPETPTAVTAPHSNSWDTYHQPRALEKHADSILA'},  # ENST00000395952.3:S42NXXXXXY48H
+                      'SVPETPTAVTAPHSNSWDTYHQPRALEKHADSILA',  # ENST00000395952.3:S42NXXXXXY48H
+                      'ANAARSQLETYKRQEDPKWEFPRKNLVL'}   # HOOK3-RET fusion
         }
         if not test_with_rna_file:
             expected_peptides['9mer'].update([
@@ -143,6 +148,7 @@ class TransgeneTest(unittest.TestCase):
                     print('Transgene failed to predict some {}s: {}'.format(kmer, ','.join(
                         expected_peptides[kmer] - observed_seqs)))
                 raise RuntimeError
+
 
     @staticmethod
     def _get_input_path(file_path):
