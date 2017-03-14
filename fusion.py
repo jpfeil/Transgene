@@ -359,7 +359,7 @@ def insert_fusions(transcriptome, fusion_calls, gene_transcripts, peplen, outfil
         with open('transgene_fusion_alignments.pkl') as f:
             previous_alignments = pickle.load(f)
 
-    except IOError:
+    except (OSError, IOError):
         previous_alignments = {}
 
     # Iterate over fusion calls
