@@ -32,6 +32,7 @@ def get_transcriptome_data(infile):
     regex = r"(?P<transcript_id>ENST[0-9A-Z]+.\d+)\|(?P<gene_id>ENSG[0-9A-Z]+.\d+)" \
             r".*CDS:(?P<start>\d+)-(?P<stop>\d+)"
     gene_transcripts = collections.defaultdict(list)
+    transcript_to_gene_id = {}
     transcript_cds = {}
     for header, comment, seq in read_fasta(infile, 'ACGT'):
         match = re.search(regex, header)
@@ -45,6 +46,7 @@ def get_transcriptome_data(infile):
             cds = seq[start: stop]
 
             gene_transcripts[gene_id].append(transcript_id)
+            gene_transcripts[transcript_id] = match.group("gene_id")
             transcript_cds[transcript_id] = cds
     return transcript_cds, gene_transcripts
 
@@ -532,8 +534,8 @@ def insert_fusions(transcriptome, fusion_calls, gene_transcripts, peplen, outfil
                         '{donor_transcript}-{acceptor_transcript}_' \
                         '{donor_hugo}-{acceptor_hugo}_' \
                         'FUSION_{score}\n' \
-                        '{sequence}\n'.format(donor_gene=donor_name,
-                                              acceptor_gene=acceptor_name,
+                        '{sequence}\n'.format(donor_gene=gene_transcripts[donor_transcript_id],
+                                              acceptor_gene=gene_transcripts[acceptor_transcript_id],
                                               donor_transcript=donor_transcript_id,
                                               acceptor_transcript=acceptor_transcript_id,
                                               donor_hugo=call.hugo1,
@@ -563,8 +565,8 @@ def insert_fusions(transcriptome, fusion_calls, gene_transcripts, peplen, outfil
                                 '{donor_transcript}-{acceptor_transcript}_' \
                                 '{donor_hugo}-{acceptor_hugo}_' \
                                 'FUSION_ACCEPTOR_FRAMESHIFT\n' \
-                                '{sequence}\n'.format(donor_gene=donor_name,
-                                                      acceptor_gene=acceptor_name,
+                                '{sequence}\n'.format(donor_gene=gene_transcripts[donor_transcript_id],
+                                                      acceptor_gene=gene_transcripts[acceptor_transcript_id],
                                                       donor_transcript=donor_transcript_id,
                                                       acceptor_transcript=acceptor_transcript_id,
                                                       donor_hugo=call.hugo1,
