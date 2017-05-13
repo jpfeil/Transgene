@@ -528,6 +528,7 @@ def insert_fusions(transcriptome, fusion_calls, gene_transcripts, peplen, outfil
                                                                                acceptor_name,
                                                                                2 * peplen - 2,
                                                                                len(fusion_peptide)))
+                    break
 
                 # Write fusion neoepitope sequence to FASTA file
                 fasta = '>{donor_gene}-{acceptor_gene}_' \
